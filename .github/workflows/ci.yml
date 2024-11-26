@@ -1,4 +1,43 @@
-name: CI/CD Pipeline
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - master  # Запускать при пуше в ветку master
+  pull_request:
+    branches:
+      - master  # Запускать при создании PR в ветку master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t whalesay-image .
+        docker tag whalesay-image:latest 
+yourdockerhubusername/whalesay-image:latest
+        docker push yourdockerhubusername/whalesay-image:latest
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}  # 
+Убедитесь, что токен правильный
+name: CI/CD 
+Pipeline
 
 on:
   push:
